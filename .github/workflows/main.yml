@@ -32,14 +32,14 @@ jobs:
 
       # Convert notebook file to python
       - name: Convert notebook
-        run: jupyter nbconvert --to python AWSGovernedTables.ipynb
+        run: jupyter nbconvert --to python traffic.ipynb
 
-      # Persist python script for use between jobs
+      # Persist python script for use between jobss
       - name: Upload python script
         uses: actions/upload-artifact@v2
         with:
-          name: AWSGovernedTables.py
-          path: AWSGovernedTables.py
+          name: traffic.py
+          path: traffic.py
   
   # Upload python script to S3 and update Glue job
   deploy:
@@ -49,7 +49,7 @@ jobs:
       - name: Download python script from build
         uses: actions/download-artifact@v2
         with:
-          name: AWSGovernedTables.py
+          name: traffic.py
           
  
           
@@ -70,13 +70,13 @@ jobs:
           
       # Copy the file to the S3 bucket
       - name: Upload to S3
-        run: aws s3 cp traffic.py s3://aaa-demo-test-two/AWSGovernedTables_${GITHUB_SHA}.py --region us-east-1
+        run: aws s3 cp traffic.py s3://aaa-demo-test-two/traffic_${GITHUB_SHA}.py --region us-east-1
       
       # Update the Glue job to use the new script
       - name: Update Glue job
         run: |
           aws glue update-job --job-name "Traffic ETL" --job-update \
-            "Role=AWSGlueServiceRole-TrafficCrawler,Command={Name=glueetl,ScriptLocation=s3://${{secrets.S3_BUCKET}}/AWSGovernedTables_${GITHUB_SHA}.py}" \
+            "Role=AWSGlueServiceRole-TrafficCrawler,Command={Name=glueetl,ScriptLocation=s3://${{secrets.S3_BUCKET}}/traffic_${GITHUB_SHA}.py}" \
             --region us-east-1
       
       # Remove stored credentials file
