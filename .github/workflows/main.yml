@@ -62,8 +62,8 @@ jobs:
       - name: Set up AWS credentials
         shell: bash
         env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AKIA3UYE6QK5ISX36KV3 }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.N6UhxKzcZ0DUowjC/wret3Guu2xm2mdWSDMQKLO4 }}
+          AWS_ACCESS_KEY_ID: ${{  secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         run: |
           mkdir -p ~/.aws
           touch ~/.aws/credentials
