@@ -1,34 +1,17 @@
-name: Update Lambda Function
-
-on:
-  push:
-    branches:
-      - AAA_CI-CD_Lambda_function # Change this to your main branch name
-
+name: Deploy lambda function from source
+on: [push]
 jobs:
-  update-lambda:
+  deploy_source:
+    name: Deploy lambda function from source
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v2
-      
-      - name: Setup Python
-        uses: actions/setup-python@v2
+      - name: checkout source code
+        uses: actions/checkout@v3
+      - name: default deploy
+        uses: appleboy/lambda-action@v0.1.9
         with:
-            python-version: 3.x # Specify your Python version here
-    
-      - name: Install AWS CLI
-        run: |
-            pip install awscli
-
-      - name: Configure AWS Credentials
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        run: |
-          aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
-          aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
-
-      - name: Update Lambda Function
-        run: |
-          aws lambda update-function-code --function-name AAALambda_POC --source-code fileb://./AAA_CI-CD/lambda_function.py
+          aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws_region: us-east-1
+          function_name: AAALambda_POC
+          source: lambda_function.py
