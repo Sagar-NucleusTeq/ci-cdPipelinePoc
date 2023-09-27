@@ -22,4 +22,4 @@ jobs:
 
       - name: Update Lambda Function
         run: |
-          aws lambda update-function-code --function-name YourLambdaFunctionName --source-code fileb://./AAA_CI-CD/lambda_function.py
+          aws lambda update-function-code --function-name AAALambda_POC --source-code fileb://./AAA_CI-CD/lambda_function.py
