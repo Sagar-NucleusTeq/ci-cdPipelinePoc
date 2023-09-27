@@ -1,5 +1,10 @@
-name: Deploy lambda function from source
-on: [push]
+name: Update Lambda Function
+
+on:
+  push:
+    branches:
+      - AAA_CI-CD_Lambda_function # Change this to your main branch name
+
 jobs:
   deploy_source:
     name: Deploy lambda function from source
