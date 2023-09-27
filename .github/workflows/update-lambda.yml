@@ -1,0 +1,25 @@
+name: Update Lambda Function
+
+on:
+  push:
+    branches:
+      - DE-169_CI-CD_Lambda # Change this to your main branch name
+
+jobs:
+  update-lambda:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Configure AWS Credentials
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        run: |
+          aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
+          aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
+
+      - name: Update Lambda Function
+        run: |
+          aws lambda update-function-code --function-name YourLambdaFunctionName --source-code fileb://./
