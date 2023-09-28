@@ -12,11 +12,12 @@ jobs:
     steps:
       - name: checkout source code
         uses: actions/checkout@v3
-      - name: default deploy
-        uses: appleboy/lambda-action@v0.1.9
+      - name: Deploy datahub lambda function
+        uses: appleboy/lambda-action@master
         with:
           aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws_region: us-east-1
           function_name: AAALambda_POC
-          source: lambda_function.py
+          s3_bucket: demo-sagar-iceberg/
+          s3_key: AAA_lambda_files/lambda_function.zip
