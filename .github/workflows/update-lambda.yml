@@ -16,7 +16,7 @@ jobs:
       - name: Create Lambda Function ZIP
         run: |
           cd AAA_CI-CD
-          zip -r ../lambda_function.zip .
+          zip -r lambda_function.zip .
 
       - name: Upload Lambda Function ZIP to S3
         uses: aws-actions/configure-aws-credentials@v1
