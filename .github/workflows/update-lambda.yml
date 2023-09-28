@@ -10,9 +10,25 @@ jobs:
     name: Deploy lambda function from source
     runs-on: ubuntu-latest
     steps:
-      - name: checkout source code
+      - name: Checkout source code
         uses: actions/checkout@v3
-      - name: Deploy datahub lambda function
+
+      - name: Create ZIP file
+        run: |
+          # Create a ZIP file from the AAA_CI-CD folder
+          zip -r AAA_CI-CD.zip AAA_CI-CD
+        working-directory: ${{ github.workspace }}
+
+      - name: Upload ZIP file to S3
+        run: |
+          # Upload the ZIP file to an S3 bucket
+          aws s3 cp AAA_CI-CD.zip s3://demo-sagar-iceberg/AAA_lambda_files/AAA_CI-CD.zip
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: us-east-1
+
+      - name: Deploy Lambda function
         uses: appleboy/lambda-action@master
         with:
           aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -20,4 +36,4 @@ jobs:
           aws_region: us-east-1
           function_name: AAALambda_POC
           s3_bucket: demo-sagar-iceberg
-          s3_key: AAA_lambda_files/lambda_function.zip
+          s3_key: AAA_lambda_files/AAA_CI-CD.zip
