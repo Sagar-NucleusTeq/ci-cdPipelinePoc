@@ -26,8 +26,10 @@ jobs:
           aws-region: us-east-1
         env:
           AWS_DEFAULT_REGION: us-east-1
+
+      - name: Upload datahub lambda zip to S3
         run: |
-          aws s3 cp ../lambda_function.zip s3://demo-sagar-iceberg/AAA_lambda_files/lambda_function.zip
+         aws s3 cp ../lambda_function.zip s3://demo-sagar-iceberg/AAA_lambda_files/lambda_function.zip
 
       - name: Deploy datahub lambda function
         uses: appleboy/lambda-action@master
