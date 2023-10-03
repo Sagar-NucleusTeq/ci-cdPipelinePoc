@@ -1,42 +1,32 @@
-name: Update Lambda Function
+name: Deploy Lambda Function
 
 on:
   push:
     branches:
-      - AAA_CI-CD_Lambda_function # Change this to your main branch name
+      - AAA_CI-CD_Lambda_function
 
 jobs:
-  deploy_source:
-    name: Deploy lambda function from source
+  deploy:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout source code
-        uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-      - name: Create Lambda Function ZIP
+      - name: Build and Push Docker Image
         run: |
-          cd AAA_CI-CD
-          zip -r lambda_function.zip .
-
-      - name: Upload Lambda Function ZIP to S3
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1
+          docker build -t my-lambda-function .
+          docker tag my-lambda-function:latest 452981530554.dkr.ecr.us-east-1.amazonaws.com/lambda_function:latest
+          docker push 452981530554.dkr.ecr.us-east-1.amazonaws.com/lambda_function:latest
         env:
-          AWS_DEFAULT_REGION: us-east-1
+          DOCKER_BUILDKIT: 1
 
-      - name: Upload datahub lambda zip to S3
+      - name: Deploy Lambda Function
         run: |
-         aws s3 cp ../lambda_function.zip s3://demo-sagar-iceberg/AAA_lambda_files/lambda_function.zip
-
-      - name: Deploy datahub lambda function
-        uses: appleboy/lambda-action@master
-        with:
-          aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws_region: us-east-1
-          function_name: AAALambda_POC
-          s3_bucket: demo-sagar-iceberg
-          s3_key: AAA_lambda_files/lambda_function.zip
+          aws lambda update-function-code \
+            --function-name MyLambdaFunction \
+            --image-uri 452981530554.dkr.ecr.us-east-1.amazonaws.com/lambda_function:latest
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: us-east-1
