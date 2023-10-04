@@ -49,7 +49,7 @@ jobs:
         if: steps.check-lambda.outputs.function_exists == 'false'
         run: |
             aws lambda create-function \
-            --function-name ci_cd_lambda \
+            --function-name ci_cd_lambda_ghcr \
             --package-type Image \
             --role arn:aws:iam::452981530554:role/aaa-lambda-role-ci-cd \
             --code ImageUri=ghcr.io/lambda_function:latest
@@ -62,7 +62,7 @@ jobs:
         if: steps.check-lambda.outputs.function_exists == 'true'
         run: |
             aws lambda update-function-code \
-            --function-name ci_cd_lambda \
+            --function-name ci_cd_lambda_ghcr \
             --image-uri ghcr.io/lambda_function:latest
         env:
             AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
