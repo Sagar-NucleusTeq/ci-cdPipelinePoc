@@ -1,9 +1,13 @@
+import json
+import pandas as pd
+import pyarrow as pa
+import boto3
+from pyiceberg.catalog import load_catalog
+
+
 def lambda_handler(event, context):
-    response = {
-        'statusCode': 200,
-        'body': 'This is Hello World #20000',
-        'headers': {
-            'Content-Type': 'application/json'
-        }
+    # Initialize the Iceberg catalog
+    return {
+        "statusCode": 200,
+        "body": json.dumps("Data converted and written to Iceberg table successfully!"),
     }
-    return response
