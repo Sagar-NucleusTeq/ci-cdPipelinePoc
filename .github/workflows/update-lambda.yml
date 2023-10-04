@@ -62,7 +62,8 @@ jobs:
           aws lambda create-function \
             --function-name ci_cd_lambda \
             --image-uri 452981530554.dkr.ecr.us-east-1.amazonaws.com/lambda_function:latest \
-            --package-type Image
+            --package-type Image \
+            --role arn:aws:iam::452981530554:role/aaa-lambda-role-ci-cd
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
