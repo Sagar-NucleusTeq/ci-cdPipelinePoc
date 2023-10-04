@@ -25,6 +25,18 @@ jobs:
         run: |
           aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 452981530554.dkr.ecr.us-east-1.amazonaws.com
 
+      - name: Check if Lambda function exists
+        id: check-lambda
+        run: |
+          if aws lambda get-function --function-name ci_cd_lambda --query 'Configuration.FunctionArn' --output text 2>/dev/null; then
+            echo "Lambda function exists."
+            echo "::set-output name=function_exists::true"
+          else
+            echo "Lambda function does not exist."
+            echo "::set-output name=function_exists::false"
+          fi
+        continue-on-error: true
+
       - name: Build and Push Docker Image
         run: |
           docker build -t lambda_function .
@@ -34,10 +46,23 @@ jobs:
           DOCKER_BUILDKIT: 1
 
       - name: Deploy Lambda Function
+        if: steps.check-lambda.outputs.function_exists == 'true'
         run: |
           aws lambda update-function-code \
             --function-name ci_cd_lambda \
             --image-uri 452981530554.dkr.ecr.us-east-1.amazonaws.com/lambda_function:latest
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: us-east-1
+
+      - name: Create Lambda Function
+        if: steps.check-lambda.outputs.function_exists == 'false'
+        run: |
+          aws lambda create-function \
+            --function-name ci_cd_lambda \
+            --image-uri 452981530554.dkr.ecr.us-east-1.amazonaws.com/lambda_function:latest \
+            --package-type Image
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
