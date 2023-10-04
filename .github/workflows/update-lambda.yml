@@ -23,7 +23,7 @@ jobs:
 
       - name: Login to ghcr
         run: |
-          echo "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" | docker login ghcr.io -u Sagar-NucleusTeq --password-stdin
+          echo "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" | docker login ghcr.io -u Sagar-NucleusTeq --password-stdin
 
       - name: Check if Lambda function exists
         id: check-lambda
