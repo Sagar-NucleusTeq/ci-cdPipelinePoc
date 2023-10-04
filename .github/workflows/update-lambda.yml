@@ -45,26 +45,27 @@ jobs:
         env:
           DOCKER_BUILDKIT: 1
 
-      - name: Deploy Lambda Function
-        if: steps.check-lambda.outputs.function_exists == 'true'
-        run: |
-          aws lambda update-function-code \
-            --function-name ci_cd_lambda \
-            --image-uri 452981530554.dkr.ecr.us-east-1.amazonaws.com/lambda_function:latest
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: us-east-1
-
       - name: Create Lambda Function
         if: steps.check-lambda.outputs.function_exists == 'false'
         run: |
-          aws lambda create-function \
+            aws lambda create-function \
             --function-name ci_cd_lambda \
-            --image-uri 452981530554.dkr.ecr.us-east-1.amazonaws.com/lambda_function:latest \
             --package-type Image \
-            --role arn:aws:iam::452981530554:role/aaa-lambda-role-ci-cd
+            --role arn:aws:iam::YOUR_ACCOUNT_ID:role/YOUR_EXECUTION_ROLE_NAME \
+            --code ImageUri=452981530554.dkr.ecr.us-east-1.amazonaws.com/lambda_function:latest
         env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: us-east-1
+            AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+            AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+            AWS_DEFAULT_REGION: us-east-1
+
+      - name: Update Lambda Function Code
+        if: steps.check-lambda.outputs.function_exists == 'true'
+        run: |
+            aws lambda update-function-code \
+            --function-name ci_cd_lambda \
+            --image-uri 452981530554.dkr.ecr.us-east-1.amazonaws.com/lambda_function:latest
+        env:
+            AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+            AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+            AWS_DEFAULT_REGION: us-east-1
+            
