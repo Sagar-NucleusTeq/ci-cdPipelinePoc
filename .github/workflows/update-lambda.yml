@@ -23,7 +23,7 @@ jobs:
 
       - name: Login to ghcr
         run: |
-          echo "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" | docker login ghcr.io -u Sagar-NucleusTeq --password-stdin
+          aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 452981530554.dkr.ecr.us-east-1.amazonaws.com
 
       - name: Check if Lambda function exists
         id: check-lambda
@@ -40,8 +40,8 @@ jobs:
       - name: Build and Push Docker Image
         run: |
           docker build -t lambda_function .
-          docker tag lambda_function:latest ghcr.io/lambda_function:latest
-          docker push ghcr.io/lambda_function:latest
+          docker tag lambda_function:latest 452981530554.dkr.ecr.us-east-1.amazonaws.com/lambda_function:latest
+          docker push 452981530554.dkr.ecr.us-east-1.amazonaws.com/lambda_function:latest
         env:
           DOCKER_BUILDKIT: 1
 
@@ -52,7 +52,7 @@ jobs:
             --function-name ci_cd_lambda_ghcr \
             --package-type Image \
             --role arn:aws:iam::452981530554:role/aaa-lambda-role-ci-cd \
-            --code ImageUri=ghcr.io/lambda_function:latest
+            --code ImageUri=452981530554.dkr.ecr.us-east-1.amazonaws.com/lambda_function:latest
         env:
             AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
             AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -63,7 +63,7 @@ jobs:
         run: |
             aws lambda update-function-code \
             --function-name ci_cd_lambda_ghcr \
-            --image-uri ghcr.io/lambda_function:latest
+            --image-uri 452981530554.dkr.ecr.us-east-1.amazonaws.com/lambda_function:latest
         env:
             AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
             AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
