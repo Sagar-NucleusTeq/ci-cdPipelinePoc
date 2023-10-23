@@ -54,6 +54,7 @@ def lambda_handler(event, context):
         print(df)
         print(df.count())
         print("Parquet file read into Pandas DataFrame.")
+        print("test .")
 
         # Convert all columns to strings
         df = df.astype(str)
