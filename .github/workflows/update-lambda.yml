@@ -3,7 +3,7 @@ name: Deploy Lambda Function
 on:
   push:
     branches:
-      - AAA_CI-CD_Lambda_function
+      - AAA_CI-CD_Lambda_function # Change this to your main branch name
 
 jobs:
   deploy:
@@ -21,50 +21,63 @@ jobs:
       - name: Configure AWS CLI
         run: aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }} && aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }} && aws configure set default.region us-east-1
 
-      - name: Login to ghcr
+      - name: Login to AWS ECR
         run: |
           aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 452981530554.dkr.ecr.us-east-1.amazonaws.com
 
-      - name: Check if Lambda function exists
-        id: check-lambda
+      - name: Check if ECR repository exists and create if not
         run: |
-          if aws lambda get-function --function-name ci_cd_lambda --query 'Configuration.FunctionArn' --output text 2>/dev/null; then
-            echo "Lambda function exists."
-            echo "::set-output name=function_exists::true"
-          else
-            echo "Lambda function does not exist."
-            echo "::set-output name=function_exists::false"
+          repo_name="data-platform-ecr"
+          if ! aws ecr describe-repositories --repository-names "$repo_name" --region us-east-1> /dev/null 2>&1; then
+            aws ecr create-repository --repository-name "$repo_name" --region us-east-1
           fi
-        continue-on-error: true
 
-      - name: Build and Push Docker Image
+      - name: Build and Push Docker Image Lookup Data
         run: |
-          docker build -t lambda_function .
-          docker tag lambda_function:latest 452981530554.dkr.ecr.us-east-1.amazonaws.com/lambda_function:latest
-          docker push 452981530554.dkr.ecr.us-east-1.amazonaws.com/lambda_function:latest
+          cd  Lookup_Data/ # Replace with the actual path to your first Dockerfile
+          docker build -t aaa-lookup-lambda-function .
+          docker tag aaa-lookup-lambda-function:latest 452981530554.dkr.ecr.us-east-1.amazonaws.com/data-platform-ecr:aaa-lookup-lambda-function
+          docker push 452981530554.dkr.ecr.us-east-1.amazonaws.com/data-platform-ecr:aaa-lookup-lambda-function
         env:
           DOCKER_BUILDKIT: 1
 
-      - name: Create Lambda Function
-        if: steps.check-lambda.outputs.function_exists == 'false'
+      - name: Update Lookup Lambda Function
         run: |
-            aws lambda create-function \
-            --function-name ci_cd_lambda_ghcr \
-            --package-type Image \
-            --role arn:aws:iam::452981530554:role/aaa-lambda-role-ci-cd \
-            --code ImageUri=452981530554.dkr.ecr.us-east-1.amazonaws.com/lambda_function:latest
-        env:
-            AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-            AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-            AWS_DEFAULT_REGION: us-east-1
-
-      - name: Update Lambda Function Code
-        if: steps.check-lambda.outputs.function_exists == 'true'
-        run: |
+            echo "Lambda function exists. Updating..."
             aws lambda update-function-code \
-            --function-name ci_cd_lambda_ghcr \
-            --image-uri 452981530554.dkr.ecr.us-east-1.amazonaws.com/lambda_function:latest
-        env:
-            AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-            AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-            AWS_DEFAULT_REGION: us-east-1
+              --function-name LAMBDA_LAKEHOUSEPILOT_LOOKUP \
+              --image-uri 452981530554.dkr.ecr.us-east-1.amazonaws.com/data-platform-ecr:aaa-lookup-lambda-function
+
+      # - name: Build and Push Docker Image USPS Table
+      #   run: |
+      #     cd USPS_Table/ # Replace with the actual path to your second Dockerfile
+      #     docker build -t aaa-usps-lambda-function .
+      #     docker tag aaa-usps-lambda-function:latest 452981530554.dkr.ecr.us-east-1.amazonaws.com/data-platform-ecr:aaa-usps-lambda-function
+      #     docker push 452981530554.dkr.ecr.us-east-1.amazonaws.com/data-platform-ecr:aaa-usps-lambda-function
+      #   env:
+      #     DOCKER_BUILDKIT: 1
+
+      # - name: Update USPS Lambda Function
+      #   run: |
+      #       echo "Lambda function exists. Updating..."
+      #       aws lambda update-function-code \
+      #         --function-name LAMBDA_LAKEHOUSEPILOT_USPS \
+      #         --image-uri 0000.dkr.ecr.us-east-1.amazonaws.com/data-platform-ecr:aaa-usps-lambda-function
+
+      # - name: Build and Push Docker Image Policy Search Table
+      #   run: |
+      #     cd Policy_search_table/ # Replace with the actual path to your second Dockerfile
+      #     docker build -t aaa-policy-search-lambda-function .
+      #     docker tag aaa-policy-search-lambda-function:latest 452981530554.dkr.ecr.us-east-1.amazonaws.com/data-platform-ecr:aaa-policy-search-lambda-function
+      #     docker push 452981530554.dkr.ecr.us-east-1.amazonaws.com/data-platform-ecr:aaa-policy-search-lambda-function
+      #   env:
+      #     DOCKER_BUILDKIT: 1
+
+      # - name: Update Policy Serach Lambda Function
+      #   run: |
+      #       echo "Lambda function exists. Updating..."
+      #       aws lambda update-function-code \
+      #         --function-name LAMBDA_LAKEHOUSEPILOT_POLICY_SEARCH\
+      #         --image-uri 452981530554.dkr.ecr.us-east-1.amazonaws.com/data-platform-ecr:aaa-policy-search-lambda-function
+
+          

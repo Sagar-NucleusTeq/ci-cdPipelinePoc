@@ -1,0 +1,5 @@
+pandas
+pyiceberg
+pyarrow
+awswrangler
+boto3
