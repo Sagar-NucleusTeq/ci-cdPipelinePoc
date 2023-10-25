@@ -19,8 +19,8 @@ def lambda_handler(event, context):
     wr.catalog.delete_table_if_exists(database=database_name, table=iceberg_table_name)
 
     # Create the Iceberg table
-    table_location = f"s3://{s3_bucket_name}/iceberg-data/{iceberg_table_name}"
-    temp_table_path = f"s3://{s3_bucket_name}/iceberg_data_temp/{iceberg_table_name}"
+    table_location = f"s3://aaa-poc-sagar/iceberg-data/{iceberg_table_name}"
+    temp_table_path = f"s3://aaa-poc-sagar/iceberg_data_temp/{iceberg_table_name}"
 
     wr.athena.to_iceberg(
         df=df,
